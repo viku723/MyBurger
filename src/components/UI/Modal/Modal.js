@@ -6,13 +6,13 @@ import Aux from '../../../hoc/Auxx/Auxx';
 import Backdrop from '../Backdrop/Backdrop';
 
 const modal = (props) => {
-    return(
+    return (
         <Aux>
-            <Backdrop show={props.show} closeModal= {props.closeModal} />
+            <Backdrop show={props.show} closeModal={props.closeModal} />
             <div className={classes.Modal} style={{
-                     transform: props.show ? 'transformY(0)': 'transformY(-100vh)',
-                     opacity: props.show ? '1': '0'
-                 }}>
+                transform: props.show ? 'transformY(0)' : 'transformY(-100vh)',
+                display: props.show ? 'block' : 'none'
+            }}>
                 {props.children}
             </div>
         </Aux>

@@ -6,7 +6,7 @@ import Button from '../../UI/Button/Button';
 const orderSummary = (props) => {
     const ingredients = Object.keys(props.ingredients)
         .map((ingKey) => {
-            return <li key={ingKey} > 
+            return <li key={ingKey} >
             <span style={{'textTransform': 'capitalize'}} >{ingKey} </span> : {props.ingredients[ingKey]} 
             </li>
         })

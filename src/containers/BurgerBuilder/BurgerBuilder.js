@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Route from 'react-router-dom';
 import Aux from '../../hoc/Auxx/Auxx';
 import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
@@ -86,8 +87,16 @@ class BurgerBuilder extends Component {
     }
 
     purchaseContinueHandler = () => {
-        //alert('continue');
-        const order = {
+        const ingredients = [];
+        for(let i in this.state.ingredients) {
+            ingredients.push(encodeURIComponent(i) + '=' + encodeURIComponent(this.state.ingredients[i]));
+        }
+        const queryString = ingredients.join('&');
+        this.props.history.push({
+            pathname: '/checkout',
+            search: '?' + queryString
+        });
+        /*const order = {
             ingredients: this.state.ingredients,
             price: this.state.totalPrice,
             customer: {
@@ -106,7 +115,7 @@ class BurgerBuilder extends Component {
             })
             .catch((Error) => {
                 console.log(Error);
-            })
+            })*/
     }
 
     render() {

@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
 import Route from 'react-router-dom';
+import { connect } from 'react-redux';
+
 import Aux from '../../hoc/Auxx/Auxx';
 import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
 import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary';
 import Modal from '../../components/UI/Modal/Modal';
 import axios from '../../axios-orders'
+import * as actions from '../../store/Actions/index';
 
 const INGREDIENT_PRICE = {
     bacon: 0.12,
@@ -16,50 +19,41 @@ const INGREDIENT_PRICE = {
 
 class BurgerBuilder extends Component {
     state = {
-        ingredients: {
-            bacon: 0,
-            salad: 0,
-            cheese: 0,
-            meat: 0
-        },
-        totalPrice: 4,
         isPurchasable: false,
         isPurchasing: false
     }
 
+    componentWillMount() {
+        this.props.onPurchaseBurgerInit();
+        this.props.onInitIngredient();
+    }
     addIngredientHandler = (type) => {
-        const oldCount = this.state.ingredients[type];
+        const oldCount = this.props.ingredients[type];
         const updatedCount = oldCount + 1;
         let updatedIngredient = {
-            ...this.state.ingredients
+            ...this.props.ingredients
         }
         updatedIngredient[type] = updatedCount;
-        const oldPrice = this.state.totalPrice;
+        const oldPrice = this.props.totalPrice;
         const totalPrice = oldPrice + INGREDIENT_PRICE[type];
 
-        this.setState({
-            ingredients: updatedIngredient,
-            totalPrice: totalPrice
-        });
+        this.props.onIngredientsAdd(updatedIngredient, totalPrice);
         this.updatePurchaseState(updatedIngredient);
     }
     removeIngredientHandler = (type) => {
-        const oldCount = this.state.ingredients[type];
+        const oldCount = this.props.ingredients[type];
         if (oldCount <= 0) {
             return;
         }
         const updatedCount = oldCount - 1;
         let updatedIngredient = {
-            ...this.state.ingredients
+            ...this.props.ingredients
         }
         updatedIngredient[type] = updatedCount;
-        const oldPrice = this.state.totalPrice;
+        const oldPrice = this.props.totalPrice;
         const totalPrice = oldPrice - INGREDIENT_PRICE[type];
 
-        this.setState({
-            ingredients: updatedIngredient,
-            totalPrice: totalPrice
-        });
+        this.props.onIngredientsRemove(updatedIngredient, totalPrice);
         this.updatePurchaseState(updatedIngredient);
     }
 
@@ -87,53 +81,28 @@ class BurgerBuilder extends Component {
     }
 
     purchaseContinueHandler = () => {
-        const ingredients = [];
-        for(let i in this.state.ingredients) {
-            ingredients.push(encodeURIComponent(i) + '=' + encodeURIComponent(this.state.ingredients[i]));
-        }
-        const queryString = ingredients.join('&');
-        this.props.history.push({
-            pathname: '/checkout',
-            search: '?' + queryString
-        });
-        /*const order = {
-            ingredients: this.state.ingredients,
-            price: this.state.totalPrice,
-            customer: {
-                name: 'Vivek',
-                address: {
-                    street: '1st cross road',
-                    zip: '12345',
-                    country: 'India'
-                },
-                deliveryType: 'fast'
-            }
-        }
-        axios.post('/orders.json', order)
-            .then((Response) => {
-                console.log(Response);
-            })
-            .catch((Error) => {
-                console.log(Error);
-            })*/
+        this.props.history.push('/checkout');
     }
 
     render() {
+        if(this.props.ingredients == null) {
+            return null;
+        }
         return(
             <Aux>
                 <Modal show={this.state.isPurchasing} closeModal={this.cancelPurchasingHandler}>
-                    <OrderSummary ingredients = {this.state.ingredients}
+                    <OrderSummary ingredients = {this.props.ingredients}
                         cancelPurchase={this.cancelPurchasingHandler}
                         purchaseContinue = {this.purchaseContinueHandler}
-                        price={this.state.totalPrice.toFixed(2)} />
+                        price={this.props.totalPrice.toFixed(2)} />
                 </Modal>
                 <div>
-                    <Burger ingredients = {this.state.ingredients} />
+                    <Burger ingredients = {this.props.ingredients} />
                 </div>
                 <div>
                     <BuildControls addIngredient = {this.addIngredientHandler}
                                    removeIngredient = {this.removeIngredientHandler}
-                                   price = {this.state.totalPrice}
+                                   price = {this.props.totalPrice}
                                    isPurchasable = {this.state.isPurchasable}
                                    purchasing = {this.purchasingHandler} />
                 </div>
@@ -142,4 +111,28 @@ class BurgerBuilder extends Component {
     }
 }
 
-export default BurgerBuilder;
+const mapStatesToProps = (state) => {
+    return {
+        ingredients: state.burgerBuilder.ingredients,
+        totalPrice: state.burgerBuilder.totalPrice
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        onIngredientsAdd: (ingredients, totalPrice) => {
+            return dispatch(actions.addIngredient(ingredients, totalPrice))
+        },
+        onIngredientsRemove: (ingredients, totalPrice) => {
+            return dispatch(actions.removeIngredient(ingredients, totalPrice))
+        },
+        onInitIngredient: () => {
+            return dispatch(actions.initIngredient())
+        },
+        onPurchaseBurgerInit: () => {
+            return dispatch(actions.purchaseBurgerInit())
+        }
+    }
+}
+
+export default connect(mapStatesToProps, mapDispatchToProps)(BurgerBuilder);

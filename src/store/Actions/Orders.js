@@ -21,16 +21,16 @@ export const purchaseBurgerStart = () => {
     }
 }
 
-export const purchaseBurger = (orderData) => {
+export const purchaseBurger = (orderData, idToken) => {
     return dispatch => {
         dispatch(purchaseBurgerStart());
-        axios.post( '/orders.json', orderData )
-        .then(response => {
-            dispatch(purchaseBurgeSuccess(response.data, orderData))
-        })
-        .catch( error => {
-            dispatch(purchaseBurgeFailed())
-        });
+        axios.post( '/orders.json?auth='+idToken, orderData )
+            .then(response => {
+                dispatch(purchaseBurgeSuccess(response.data, orderData))
+            })
+            .catch( error => {
+                dispatch(purchaseBurgeFailed())
+            });
     }
 }
 

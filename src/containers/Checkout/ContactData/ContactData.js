@@ -36,6 +36,7 @@ class ContactData extends Component {
             },
             deliveryMethod: 'fastest'
         }
+        order.localId = this.props.localId;
         this.props.onPurchase(order, this.props.idToken);
     }
     render() {
@@ -65,7 +66,8 @@ const mapStateToProps = (state) => {
         ingredients: state.burgerBuilder.ingredients,
         price: state.burgerBuilder.totalPrice,
         loading: state.order.loading,
-        idToken: state.auth.idToken
+        idToken: state.auth.idToken,
+        localId: state.auth.localId
     }
 }
 const mapDispatchToprops = (dispatch) => {
